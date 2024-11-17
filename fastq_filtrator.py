@@ -1,11 +1,16 @@
-from dna_rna_modules import (transcription,
-                             reversion,
-                             complementation,
-                             reverse_compl,
-                             primers
-                             )
-from filtered_modules import gc_count
-from filtered_modules import quality_count
+
+from dna_rna_modules import (
+    transcription,
+    reversion,
+    complementation,
+    reverse_compl,
+    primers,
+)
+
+import os
+from save_modules import save_filtered
+from filtered_modules import filter_fastq
+
 
 NUCLEOTIDES: list = ["A", "a", "T", "t", "G", "g", "C", "c", "U", "u"]
 fn_map: dict[str, callable] = {
@@ -47,17 +52,16 @@ def run_dna_rna_tools(*args: str) -> str:
         return "Something went wrong. Check your input."
 
 
-def filter_fastq(
-        seqs: dict[str, tuple[str, str]],
-        gc_bounds: tuple[float, float] = (0, 100),
-        length_bounds: tuple[int, int] = (0, 2**32),
-        quality_threshold: float = 0
-) -> dict[str, tuple[str, str]]:
-
+      
+def read_and_filter_save_fastq(
+    file_name: str,
+    gc_bounds: tuple[float, float] = (0, 100),
+    length_bounds: tuple[int, int] = (0, 2**32),
+    quality_threshold: float = 0,
+):
     """
-    Filters your fastq data.
-
-    :param seqs: dict, name: sequence; quality
+    Function that reads input fastq file, filters it and save suitable sequences to the new directory as a file.
+    :param file_name: The name of the input FASTQ file.
     :param gc_bounds: max and min boundary values of the GC composition.
                     default = (0,100)
     :param length_bounds: max and min boundary for the length of the seq
@@ -65,26 +69,27 @@ def filter_fastq(
     :param quality_threshold: threshold for the quality (phred33).
                     default = 0
     :return:
-    filtered dict.
+    output_fastq_№.fastq file with filtered sequences saved to a "filtered" directory
     """
+    data_dir = os.getcwd()
+    output_directory = os.path.join(data_dir, "filtered")
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
 
-    if isinstance(gc_bounds, (int, float)):
-        gc_bounds = [0, gc_bounds]
+    with open(os.path.join(data_dir, file_name), "r") as fastq_file:
+        fastq_data = {}
+        while True:
+            index = fastq_file.readline().strip()
+            if not index:
+                break
+            sequence = fastq_file.readline().strip()
+            fastq_file.readline().strip()
+            quality = fastq_file.readline().strip()
+            fastq_data[index] = (sequence, quality)
+    filtered_data = filter_fastq(
+        fastq_data, gc_bounds, length_bounds, quality_threshold
+    )
+    return save_filtered(filtered_data, output_directory)
 
-    if isinstance(length_bounds, (int, float)):
-        length_bounds = [0, length_bounds]
 
-    filtered_seqs = {}
-    for name, (sequence, quality) in seqs.items():
-        seq_length = len(sequence)
-        if not (length_bounds[0] <= seq_length <= length_bounds[1]):
-            continue
-        gc_content = gc_count(sequence)
-        if not (gc_bounds[0] <= gc_content <= gc_bounds[1]):
-            continue
-        average_quality = quality_count(quality)
-        if average_quality < quality_threshold:
-            continue
-        filtered_seqs[name] = (sequence, quality)
-
-    return filtered_seqs
+filtered_data = read_and_filter_fastq("example_fastq.fastq", gc_bounds=(5, 2**20))

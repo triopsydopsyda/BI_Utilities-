@@ -1,20 +1,20 @@
 def gc_count(sequence: str) -> float:
-    Cn = sequence.count("C")
-    Gn = sequence.count("G")
-    GCvalue = (Cn + Gn) / len(sequence) * 100
-    return GCvalue
+    cn = sequence.count("C")
+    gn = sequence.count("G")
+    gc_value = (cn + gn) / len(sequence) * 100
+    return gc_value
 
 
 def quality_count(quality: str) -> float:
-    Quality_value = sum(ord(char) - 33 for char in quality) / len(quality)
-    return Quality_value
+    quality_value = sum(ord(char) - 33 for char in quality) / len(quality)
+    return quality_value
 
 
 def filter_fastq(
-        seqs: dict[str, tuple[str, str]],
-        gc_bounds: tuple[float, float] = (0, 100),
-        length_bounds: tuple[int, int] = (0, 2**32),
-        quality_threshold: float = 0
+    seqs: dict[str, tuple[str, str]],
+    gc_bounds: tuple[float, float] = (0, 100),
+    length_bounds: tuple[int, int] = (0, 2**32),
+    quality_threshold: float = 0,
 ) -> dict[str, tuple[str, str]]:
     """
     Filters your fastq data.
@@ -50,6 +50,8 @@ def filter_fastq(
         filtered_seqs[name] = (sequence, quality)
 
     if not filtered_seqs:
+
         return "There are no suitable sequences"
+
 
     return filtered_seqs
