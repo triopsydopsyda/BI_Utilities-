@@ -50,6 +50,8 @@ def filter_fastq(
         filtered_seqs[name] = (sequence, quality)
 
     if not filtered_seqs:
-        return f"There are no suitable sequences"
+
+        return "There are no suitable sequences"
+
 
     return filtered_seqs

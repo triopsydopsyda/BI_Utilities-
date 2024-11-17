@@ -8,6 +8,7 @@ Bioinformatic Institution.
 
 **FastQ Filtrator** is a toolkit for working with the FastQ format. The program filters reads based on the following factors.
 
+
 ## FastQ Filtrator
 FastQ Filtrator — is a utility for working with sequences in FastQ format. The program filters reads based on the following criteria:
 - Sequence length (length bounds)
@@ -71,4 +72,3 @@ This function parses a BLAST output file to extract sequences that show signific
 
 #### Example:
 ```python parse_blast_output("example_blast_results.txt", "parsed_blast_results.txt") ```
-
